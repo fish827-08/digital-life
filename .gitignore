@@ -1,0 +1,27 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.so
+.venv/
+venv/
+dist/
+build/
+
+# --- 测试与工具 ---
+.pytest_cache/
+.coverage
+htmlcov/
+
+# --- 打包产物 ---
+*.egg-info/
+
+# --- 编辑器 / 系统 ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# --- 本地数据（模拟存档/运行日志不入库） ---
+*.sim
+runs/
+logs/
