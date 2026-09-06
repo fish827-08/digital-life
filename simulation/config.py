@@ -43,6 +43,18 @@ class ResourceConfig(BaseModel):
         ge=0.0,
         description="每 tick 每格资源再生量（不超过 capacity）",
     )
+    patchiness: float = Field(
+        default=0.0,
+        ge=0.0,
+        le=1.0,
+        description="初始资源空间异质性：0=全场均匀；>0 时按块随机调整初始填充率"
+        "（块间差异幅度 = ±patchiness×initial_fill）",
+    )
+    patch_count: int = Field(
+        default=4,
+        ge=1,
+        description="异质分块密度（每边块数，patchiness>0 时生效）",
+    )
 
 
 class OrganismConfig(BaseModel):
@@ -132,6 +144,14 @@ class SimulationConfig(BaseModel):
         default=50,
         ge=0,
         description="无头模式进度打印间隔（tick 数）；0 = 从不打印进度",
+    )
+    history_limit: int = Field(
+        default=0,
+        ge=0,
+        description="全程统计历史（TickStats 序列）保留上限（tick 数）；"
+        "0 = 无限保留（默认，保持 Stage 1 语义）。>0 时引擎改为环形保留近期尾部，"
+        "并同时维护运行期累计（total_born / total_died / 死因汇总不受裁剪影响），"
+        "供超长实验（百万 tick 级）避免无界内存增长。",
     )
 
 

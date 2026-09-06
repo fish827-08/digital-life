@@ -17,7 +17,7 @@ viz = ["pygame>=2.5"]
 dev = ["pytest>=8.0"]
 
 [tool.setuptools]
-packages = ["core", "world", "evolution", "brain", "simulation", "visualization", "persistence"]
+packages = ["core", "world", "evolution", "brain", "simulation", "visualization", "observatory", "persistence"]
 py-modules = ["main"]
 
 [tool.pytest.ini_options]

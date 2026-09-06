@@ -39,6 +39,13 @@ class SimulationEngine:
         self._extinct = False
         self._finished = False
 
+        # ---- 有界历史模式（history_limit>0）----
+        # 历史序列裁剪为近期尾部；运行期累计保证 total_* / 死因汇总完整。
+        self._history_limit = config.simulation.history_limit
+        self._run_born = 0
+        self._run_died = 0
+        self._run_deaths: Counter = Counter()
+
     # ---- 只读状态 --------------------------------------------------------
 
     @property
@@ -61,14 +68,20 @@ class SimulationEngine:
 
     @property
     def total_born(self) -> int:
+        if self._history_limit > 0:
+            return self.spawn_report.born + self._run_born
         return self.spawn_report.born + sum(s.born for s in self._history)
 
     @property
     def total_died(self) -> int:
+        if self._history_limit > 0:
+            return self._run_died
         return sum(s.died for s in self._history)
 
     def death_cause_totals(self) -> Counter:
         """全部历史死亡按死因汇总（Counter[DeathCause]）。"""
+        if self._history_limit > 0:
+            return self._run_deaths.copy()
         totals: Counter = Counter()
         for s in self._history:
             totals.update(s.deaths_by_cause)
@@ -122,6 +135,14 @@ class SimulationEngine:
             total_resource=self.world.total_resource(),
         )
         self._history.append(stats)
+        if self._history_limit > 0:
+            # 环形保留：维护运行期累计后裁剪旧历史，内存有上界。
+            self._run_born += report.born
+            self._run_died += report.died
+            self._run_deaths.update(report.deaths_by_cause)
+            overflow = len(self._history) - self._history_limit
+            if overflow > 0:
+                del self._history[:overflow]
         return stats
 
     def _end_condition_met(self) -> bool:

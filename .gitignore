@@ -21,7 +21,8 @@ htmlcov/
 .DS_Store
 Thumbs.db
 
-# --- 本地数据（模拟存档/运行日志不入库） ---
+# --- 本地数据（模拟存档/运行日志/实验结果不入库） ---
 *.sim
 runs/
 logs/
+results/

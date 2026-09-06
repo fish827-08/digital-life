@@ -49,6 +49,8 @@ class Organism:
         "phenotype",
         "lifecycle",
         "config",
+        "generation",
+        "parent_id",
     )
 
     def __init__(
@@ -62,9 +64,13 @@ class Organism:
         energy: float | None = None,
         phenotype: dict[str, float] | None = None,
         lifecycle: Lifecycle | None = None,
+        generation: int = 0,
+        parent_id: int | None = None,
     ) -> None:
         if x < 0 or y < 0:
             raise ValueError(f"位置不能为负：({x}, {y})")
+        if generation < 0:
+            raise ValueError(f"世代不能为负：{generation}")
         self.organism_id = organism_id
         self.x = x
         self.y = y
@@ -73,6 +79,9 @@ class Organism:
         self.phenotype = phenotype if phenotype is not None else decode(genome.genes)
         self.lifecycle = lifecycle if lifecycle is not None else Lifecycle()
         self.config = config
+        # ---- 观测元数据（不参与行为/选择，仅供谱系与世代统计） --------
+        self.generation = generation
+        self.parent_id = parent_id
 
     # ---- 状态查询 ------------------------------------------------------
 

@@ -42,6 +42,7 @@ class Population:
         self.world = world
         self._organisms: dict[int, Organism] = {}
         self._next_id = 0
+        self._max_generation = 0  # 观测元数据：当前存活血统的最深世代号（增量维护）
 
     # ---- 出生 ------------------------------------------------------------
 
@@ -58,6 +59,8 @@ class Population:
                 y=y,
                 genome=genome,
                 config=self.config.organisms,
+                generation=0,  # 初代世代号 0
+                parent_id=None,  # 初代无亲代
             )
             self._organisms[org.organism_id] = org
         report.born = n
@@ -95,8 +98,12 @@ class Population:
                     genome=off.genome,
                     config=self.config.organisms,
                     energy=off.energy,
+                    generation=org.generation + 1,  # 世代号 +1（谱系观测）
+                    parent_id=org.organism_id,  # 记录亲代（谱系观测）
                 )
                 self._organisms[child.organism_id] = child
+                if child.generation > self._max_generation:
+                    self._max_generation = child.generation
                 report.born += 1
 
         report.deaths_by_cause, report.died = self._purge_dead()
@@ -117,6 +124,11 @@ class Population:
 
     def get(self, organism_id: int) -> Optional[Organism]:
         return self._organisms.get(organism_id)
+
+    @property
+    def max_generation(self) -> int:
+        """当前存活血统的最深世代号（观测用，O(1)）。"""
+        return self._max_generation
 
     def total_energy(self) -> float:
         return sum(o.energy for o in self._organisms.values())
